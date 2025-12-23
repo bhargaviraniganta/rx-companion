@@ -158,14 +158,16 @@ const PredictionResult: React.FC<PredictionResultProps> = ({ result, isLoading }
 
       {/* Chemical Interaction Insight */}
       <div className="border border-border rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <FileText className="h-5 w-5 text-primary" />
           <h3 className="font-semibold text-foreground">Chemical Interaction Insight</h3>
         </div>
         
-        <div className="space-y-3">
+        <h4 className="text-sm font-medium text-foreground mb-3">Analysis Summary:</h4>
+        
+        <ul className="space-y-2 pl-1">
           {result.summary.map((point, index) => (
-            <div
+            <li
               key={index}
               className="flex items-start gap-3 text-sm"
             >
@@ -175,17 +177,9 @@ const PredictionResult: React.FC<PredictionResultProps> = ({ result, isLoading }
                 }`}
               />
               <span className="text-muted-foreground">{point}</span>
-            </div>
+            </li>
           ))}
-        </div>
-      </div>
-
-      {/* Disclaimer */}
-      <div className="mt-6 p-3 bg-muted/30 rounded-lg">
-        <p className="text-xs text-muted-foreground text-center">
-          <strong>Disclaimer:</strong> This prediction is for research purposes only. 
-          Always conduct laboratory testing before formulation decisions.
-        </p>
+        </ul>
       </div>
     </div>
   );
