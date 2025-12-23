@@ -98,27 +98,6 @@ const Dashboard: React.FC = () => {
           <PredictionResultComponent result={result} isLoading={isLoading} />
         </div>
 
-        {/* Info Section */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-card rounded-xl shadow-card p-5">
-            <h3 className="font-semibold text-foreground mb-2">About Predictions</h3>
-            <p className="text-sm text-muted-foreground">
-              Our ML model analyzes molecular structures and known interaction patterns to predict compatibility between drugs and excipients.
-            </p>
-          </div>
-          <div className="bg-card rounded-xl shadow-card p-5">
-            <h3 className="font-semibold text-foreground mb-2">SMILES Notation</h3>
-            <p className="text-sm text-muted-foreground">
-              SMILES (Simplified Molecular Input Line Entry System) is a specification for describing the structure of chemical species.
-            </p>
-          </div>
-          <div className="bg-card rounded-xl shadow-card p-5">
-            <h3 className="font-semibold text-foreground mb-2">Research Use Only</h3>
-            <p className="text-sm text-muted-foreground">
-              These predictions are intended for preliminary research. Always verify with laboratory testing before formulation.
-            </p>
-          </div>
-        </div>
       </main>
     </div>
   );
