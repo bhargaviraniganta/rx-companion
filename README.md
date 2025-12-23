@@ -1,73 +1,109 @@
-# Welcome to your Lovable project
+# DrugExciPredict
 
-## Project info
+**Drug–Excipient Compatibility Predictor** - An AI-powered web application for predicting drug-excipient interactions in pharmaceutical formulations.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Overview
 
-## How can I edit this code?
+DrugExciPredict helps pharmaceutical researchers and formulators predict the compatibility between active pharmaceutical ingredients (APIs) and excipients using machine learning models.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **User Authentication**: Secure login/signup with JWT tokens and password hashing
+- **Drug-Excipient Prediction**: ML-based compatibility analysis
+- **Risk Assessment**: Probability scores and risk level indicators
+- **Chemical Insights**: Detailed analysis summaries
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Running the Frontend
 
-**Use your preferred IDE**
+```bash
+# Install dependencies
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Project Structure
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/
+│   ├── ui/                      # Shadcn UI components
+│   ├── dashboard/               # Dashboard components
+│   │   ├── DashboardHeader.tsx
+│   │   ├── PredictionForm.tsx
+│   │   └── PredictionResult.tsx
+│   ├── AuthLayout.tsx           # Auth pages layout
+│   ├── Logo.tsx                 # App branding
+│   └── ProtectedRoute.tsx       # Route guard
+├── context/
+│   └── AuthContext.tsx          # Authentication state
+├── pages/
+│   ├── Login.tsx
+│   ├── Signup.tsx
+│   ├── ForgotPassword.tsx
+│   └── Dashboard.tsx
+├── services/
+│   ├── mockAuth.ts              # Mock auth service
+│   └── predictionService.ts     # Prediction logic
+└── types/
+    └── index.ts                 # TypeScript interfaces
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## Authentication Flow
 
-This project is built with:
+1. **Signup**: User registers → Password hashed → Stored in localStorage → JWT returned
+2. **Login**: Credentials verified → JWT generated → Used for protected routes
+3. **Forgot Password**: Token generated → Logged to console (simulated email)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## Prediction API (Mock)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+The prediction service simulates ML model responses:
 
-## Can I connect a custom domain to my Lovable project?
+- **Lactose Monohydrate**: Compatible (92.5%, LOW risk)
+- **Microcrystalline Cellulose**: Compatible (88.3%, LOW risk)
+- **Magnesium Stearate**: Non-Compatible (34.2%, HIGH risk)
+- **PVP**: Compatible (85.7%, LOW risk)
+- **Starch**: Compatible (78.9%, LOW risk)
 
-Yes, you can!
+Replace `src/services/predictionService.ts` with actual API calls to integrate a real ML model.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Backend Implementation (Optional)
+
+To add a real Node.js/Express backend:
+
+1. Create a `backend/` folder with Express server
+2. Use bcrypt for password hashing
+3. Use JWT for session tokens
+4. Use SQLite or JSON file for user storage
+5. Update frontend services to call real API endpoints
+
+---
+
+## Technologies Used
+
+- React 18 + TypeScript
+- Vite (build tool)
+- Tailwind CSS (styling)
+- Shadcn UI (components)
+- React Router (navigation)
+- TanStack Query (data fetching)
+
+---
+
+## License
+
+MIT License - For educational and research purposes.
