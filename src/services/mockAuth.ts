@@ -118,22 +118,22 @@ export const mockAuthService = {
     };
   },
 
-  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string }> {
+  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string; resetEmail?: string }> {
     await delay();
     
     const users = getStoredUsers();
     const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
     
     if (!user) {
-      // Don't reveal if email exists for security
+      // Don't reveal if email exists for security - still return success message
       return {
-        message: "If an account exists with this email, a reset link has been generated.",
+        message: "If an account exists with this email, you will be redirected to reset your password.",
       };
     }
     
     const resetToken = generateToken();
     
-    // Store reset token (in real app, this would be stored on backend with expiry)
+    // Store reset token with expiry
     const resetTokens = JSON.parse(localStorage.getItem(RESET_TOKENS_KEY) || "{}");
     resetTokens[email.toLowerCase()] = {
       token: resetToken,
@@ -141,18 +141,50 @@ export const mockAuthService = {
     };
     localStorage.setItem(RESET_TOKENS_KEY, JSON.stringify(resetTokens));
     
-    // In real app, this would send an email
-    console.log("===========================================");
-    console.log("PASSWORD RESET LINK (simulated email):");
-    console.log(`Reset Token: ${resetToken}`);
-    console.log(`For user: ${email}`);
-    console.log("In production, this would be sent via email.");
-    console.log("===========================================");
-    
     return {
-      message: "Password reset link generated (check browser console)",
-      resetToken, // Only for demo purposes
+      message: "Redirecting to password reset...",
+      resetToken,
+      resetEmail: email.toLowerCase(),
     };
+  },
+
+  validateResetToken(email: string, token: string): boolean {
+    const resetTokens = JSON.parse(localStorage.getItem(RESET_TOKENS_KEY) || "{}");
+    const stored = resetTokens[email.toLowerCase()];
+    
+    if (!stored) return false;
+    if (stored.token !== token) return false;
+    if (Date.now() > stored.expires) return false;
+    
+    return true;
+  },
+
+  async resetPassword(email: string, token: string, newPassword: string): Promise<void> {
+    await delay();
+    
+    if (!this.validateResetToken(email, token)) {
+      throw new Error("Invalid or expired reset token");
+    }
+    
+    if (newPassword.length < 8) {
+      throw new Error("Password must be at least 8 characters");
+    }
+    
+    const users = getStoredUsers();
+    const userIndex = users.findIndex((u) => u.email.toLowerCase() === email.toLowerCase());
+    
+    if (userIndex === -1) {
+      throw new Error("User not found");
+    }
+    
+    // Update password
+    users[userIndex].passwordHash = simpleHash(newPassword);
+    saveUsers(users);
+    
+    // Remove used reset token
+    const resetTokens = JSON.parse(localStorage.getItem(RESET_TOKENS_KEY) || "{}");
+    delete resetTokens[email.toLowerCase()];
+    localStorage.setItem(RESET_TOKENS_KEY, JSON.stringify(resetTokens));
   },
 
   async validateToken(token: string): Promise<User | null> {

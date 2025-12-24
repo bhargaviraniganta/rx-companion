@@ -6,7 +6,7 @@ interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   signup: (credentials: SignupCredentials) => Promise<void>;
   logout: () => void;
-  forgotPassword: (email: string) => Promise<{ message: string; resetToken?: string }>;
+  forgotPassword: (email: string) => Promise<{ message: string; resetToken?: string; resetEmail?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

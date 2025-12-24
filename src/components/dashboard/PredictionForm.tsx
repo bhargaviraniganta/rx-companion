@@ -1,15 +1,9 @@
 import React from "react";
-import { PredictionInput, EXCIPIENTS } from "@/types";
+import { PredictionInput } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import ExcipientCombobox from "./ExcipientCombobox";
 import { FlaskConical, Loader2, Atom, TestTube } from "lucide-react";
 
 interface PredictionFormProps {
@@ -77,27 +71,15 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="excipient">Select Excipient</Label>
-          <Select
+          <Label htmlFor="excipient">Excipient</Label>
+          <ExcipientCombobox
             value={input.excipient}
-            onValueChange={(value) => onChange({ ...input, excipient: value })}
+            onChange={(value) => onChange({ ...input, excipient: value })}
             disabled={isLoading}
-          >
-            <SelectTrigger id="excipient" className="bg-background">
-              <SelectValue placeholder="Choose an excipient..." />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-lg z-50">
-              {EXCIPIENTS.map((excipient) => (
-                <SelectItem
-                  key={excipient}
-                  value={excipient}
-                  className="hover:bg-accent cursor-pointer"
-                >
-                  {excipient}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
+          <p className="text-xs text-muted-foreground">
+            Select from suggestions or enter a custom excipient
+          </p>
         </div>
 
         <Button

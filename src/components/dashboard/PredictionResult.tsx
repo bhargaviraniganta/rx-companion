@@ -76,10 +76,7 @@ const PredictionResult: React.FC<PredictionResultProps> = ({ result, isLoading }
         <div className="p-2 bg-primary/10 rounded-lg">
           <BarChart3 className="h-5 w-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Prediction Analysis</h2>
-          <p className="text-sm text-muted-foreground">Compatibility assessment complete</p>
-        </div>
+        <h2 className="text-lg font-semibold text-foreground">Prediction Analysis</h2>
       </div>
 
       {/* Compatibility Status */}
@@ -96,18 +93,13 @@ const PredictionResult: React.FC<PredictionResultProps> = ({ result, isLoading }
           ) : (
             <XCircle className="h-8 w-8 text-destructive" />
           )}
-          <div>
-            <h3
-              className={`text-xl font-bold ${
-                isCompatible ? "text-success" : "text-destructive"
-              }`}
-            >
-              {isCompatible ? "COMPATIBLE" : "NON-COMPATIBLE"}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Drug-excipient interaction assessment
-            </p>
-          </div>
+          <h3
+            className={`text-xl font-bold ${
+              isCompatible ? "text-success" : "text-destructive"
+            }`}
+          >
+            {isCompatible ? "COMPATIBLE" : "NON-COMPATIBLE"}
+          </h3>
         </div>
       </div>
 
