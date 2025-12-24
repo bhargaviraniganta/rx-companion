@@ -88,14 +88,18 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <PredictionForm
-            input={input}
-            onChange={setInput}
-            onSubmit={handlePredict}
-            isLoading={isLoading}
-          />
-          <PredictionResultComponent result={result} isLoading={isLoading} />
+        <div className="flex gap-6 overflow-x-auto pb-4">
+          <div className="min-w-[400px] flex-1">
+            <PredictionForm
+              input={input}
+              onChange={setInput}
+              onSubmit={handlePredict}
+              isLoading={isLoading}
+            />
+          </div>
+          <div className="min-w-[400px] flex-1">
+            <PredictionResultComponent result={result} isLoading={isLoading} />
+          </div>
         </div>
 
       </main>
