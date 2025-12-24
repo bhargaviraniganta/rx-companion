@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "@/components/AuthLayout";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   
   const { forgotPassword } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +32,17 @@ const ForgotPassword: React.FC = () => {
     
     try {
       const result = await forgotPassword(email);
-      setIsSuccess(true);
-      toast({
-        title: "Reset Link Generated",
-        description: result.message,
-      });
+      
+      if (result.resetToken && result.resetEmail) {
+        // Navigate to reset password page with token
+        navigate(`/reset-password?token=${encodeURIComponent(result.resetToken)}&email=${encodeURIComponent(result.resetEmail)}`);
+      } else {
+        // No account found, show generic message
+        toast({
+          title: "Check Your Email",
+          description: "If an account exists, you will receive a password reset link.",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -47,43 +53,6 @@ const ForgotPassword: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
-  if (isSuccess) {
-    return (
-      <AuthLayout>
-        <div className="animate-fade-in text-center">
-          <div className="mb-6">
-            <div className="mx-auto w-16 h-16 bg-success-light rounded-full flex items-center justify-center">
-              <CheckCircle className="h-8 w-8 text-success" />
-            </div>
-          </div>
-          
-          <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">
-            Check Your Console
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            Password reset link has been generated. Check your browser's developer console (F12 → Console) to see the reset token.
-          </p>
-          
-          <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6 text-left">
-            <p className="text-sm text-muted-foreground mb-2">
-              <strong>Note:</strong> In a production environment, this reset link would be sent to your email. For this demo, the token is logged to the console.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Press F12 → Console to view the reset token
-            </p>
-          </div>
-          
-          <Link to="/login">
-            <Button variant="outline" className="w-full">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Login
-            </Button>
-          </Link>
-        </div>
-      </AuthLayout>
-    );
-  }
 
   return (
     <AuthLayout>
@@ -101,7 +70,7 @@ const ForgotPassword: React.FC = () => {
             Forgot password?
           </h2>
           <p className="text-muted-foreground">
-            Enter your email and we'll generate a password reset link
+            Enter your email and we'll help you reset your password
           </p>
         </div>
 
@@ -133,10 +102,10 @@ const ForgotPassword: React.FC = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Generating reset link...
+                Processing...
               </>
             ) : (
-              "Send Reset Link"
+              "Reset Password"
             )}
           </Button>
         </form>
