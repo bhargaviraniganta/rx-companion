@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BarChart3, Users, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDrugCount } from "@/data/drugDatabase";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const Analytics: React.FC = () => {
   const [visitorCount, setVisitorCount] = useState(0);
@@ -41,24 +36,6 @@ const Analytics: React.FC = () => {
     { name: "High Risk", value: stats.highRisk, color: "hsl(38, 92%, 50%)" },
   ];
 
-  const monthlyData = [
-    { month: "Jan", predictions: 89 },
-    { month: "Feb", predictions: 102 },
-    { month: "Mar", predictions: 134 },
-    { month: "Apr", predictions: 98 },
-    { month: "May", predictions: 156 },
-    { month: "Jun", predictions: 178 },
-    { month: "Jul", predictions: 145 },
-    { month: "Aug", predictions: 167 },
-    { month: "Sep", predictions: 178 },
-  ];
-
-  const chartConfig = {
-    predictions: {
-      label: "Predictions",
-      color: "hsl(175, 70%, 35%)",
-    },
-  };
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -211,39 +188,6 @@ const Analytics: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Monthly Predictions Chart */}
-      <Card className="border-border shadow-card">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Monthly Prediction Trend
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="h-[300px]">
-            <BarChart data={monthlyData}>
-              <XAxis 
-                dataKey="month" 
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "hsl(215, 15%, 45%)", fontSize: 12 }}
-              />
-              <YAxis 
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "hsl(215, 15%, 45%)", fontSize: 12 }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar 
-                dataKey="predictions" 
-                fill="hsl(175, 70%, 35%)" 
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
 
       {/* Additional Stats */}
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">

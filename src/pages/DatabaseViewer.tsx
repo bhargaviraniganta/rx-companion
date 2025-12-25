@@ -126,7 +126,7 @@ const DatabaseViewer: React.FC = () => {
                     onClick={() => handleSort("id")}
                   >
                     <div className="flex items-center gap-1">
-                      # <SortIcon field="id" />
+                      SNO <SortIcon field="id" />
                     </div>
                   </th>
                   <th 
