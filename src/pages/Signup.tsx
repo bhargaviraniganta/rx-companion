@@ -6,10 +6,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "@/components/AuthLayout";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, ArrowRight, Check, X } from "lucide-react";
+import { Loader2, Mail, Lock, ArrowRight, Check, X } from "lucide-react";
+import { FirebaseError } from "firebase/app";
+
+const getFirebaseErrorMessage = (error: FirebaseError): string => {
+  switch (error.code) {
+    case "auth/email-already-in-use":
+      return "An account with this email already exists.";
+    case "auth/invalid-email":
+      return "Invalid email address format.";
+    case "auth/weak-password":
+      return "Password is too weak. Please use a stronger password.";
+    case "auth/operation-not-allowed":
+      return "Email/password accounts are not enabled.";
+    default:
+      return "An error occurred. Please try again.";
+  }
+};
 
 const Signup: React.FC = () => {
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,7 +34,6 @@ const Signup: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Password validation rules
   const passwordRules = [
     { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
     { label: "Contains a number", test: (p: string) => /\d/.test(p) },
@@ -31,7 +45,7 @@ const Signup: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!fullName || !email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword) {
       toast({
         title: "Validation Error",
         description: "Please fill in all fields",
@@ -62,16 +76,19 @@ const Signup: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      await signup({ fullName, email, password, confirmPassword });
+      await signup(email, password);
       toast({
         title: "Account Created!",
-        description: "Welcome to DrugExciPredict",
+        description: "Please log in with your new account",
       });
-      navigate("/dashboard", { replace: true });
+      navigate("/login", { replace: true });
     } catch (error) {
+      const message = error instanceof FirebaseError 
+        ? getFirebaseErrorMessage(error)
+        : "Registration failed. Please try again.";
       toast({
         title: "Registration Failed",
-        description: error instanceof Error ? error.message : "Could not create account",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -92,23 +109,6 @@ const Signup: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="pl-10"
-                disabled={isSubmitting}
-                autoComplete="name"
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <div className="relative">

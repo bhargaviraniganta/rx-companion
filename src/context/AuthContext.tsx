@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { User, AuthState, LoginCredentials, SignupCredentials } from "@/types";
-import { mockAuthService } from "@/services/mockAuth";
+import { firebaseAuthService, User } from "@/services/firebase";
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
 
 interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
-  signup: (credentials: SignupCredentials) => Promise<void>;
-  logout: () => void;
-  forgotPassword: (email: string) => Promise<{ message: string; resetToken?: string; resetEmail?: string }>;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,85 +19,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>({
     user: null,
-    token: null,
     isAuthenticated: false,
     isLoading: true,
   });
 
-  // Check for persisted auth on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      const persistedAuth = mockAuthService.getPersistedAuth();
-      
-      if (persistedAuth) {
-        const user = await mockAuthService.validateToken(persistedAuth.token);
-        if (user) {
-          setState({
-            user: persistedAuth.user,
-            token: persistedAuth.token,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-          return;
-        }
-      }
-      
-      setState((prev) => ({ ...prev, isLoading: false }));
-    };
-
-    checkAuth();
-  }, []);
-
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    setState((prev) => ({ ...prev, isLoading: true }));
-    
-    try {
-      const { user, token } = await mockAuthService.login(credentials);
-      mockAuthService.persistAuth(user, token);
-      
+    const unsubscribe = firebaseAuthService.onAuthStateChanged((user) => {
       setState({
         user,
-        token,
-        isAuthenticated: true,
+        isAuthenticated: !!user,
         isLoading: false,
       });
-    } catch (error) {
-      setState((prev) => ({ ...prev, isLoading: false }));
-      throw error;
-    }
-  }, []);
-
-  const signup = useCallback(async (credentials: SignupCredentials) => {
-    setState((prev) => ({ ...prev, isLoading: true }));
-    
-    try {
-      const { user, token } = await mockAuthService.signup(credentials);
-      mockAuthService.persistAuth(user, token);
-      
-      setState({
-        user,
-        token,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (error) {
-      setState((prev) => ({ ...prev, isLoading: false }));
-      throw error;
-    }
-  }, []);
-
-  const logout = useCallback(() => {
-    mockAuthService.logout();
-    setState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
     });
+
+    return () => unsubscribe();
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    await firebaseAuthService.login(email, password);
+  }, []);
+
+  const signup = useCallback(async (email: string, password: string) => {
+    await firebaseAuthService.signup(email, password);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await firebaseAuthService.logout();
   }, []);
 
   const forgotPassword = useCallback(async (email: string) => {
-    return mockAuthService.forgotPassword(email);
+    await firebaseAuthService.sendPasswordReset(email);
   }, []);
 
   return (

@@ -1,28 +1,3 @@
-export interface User {
-  id: string;
-  email: string;
-  fullName: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface SignupCredentials {
-  fullName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
 export interface PredictionInput {
   drugName: string;
   smilesCode: string;
