@@ -7,6 +7,26 @@ import { Label } from "@/components/ui/label";
 import AuthLayout from "@/components/AuthLayout";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
+import { FirebaseError } from "firebase/app";
+
+const getFirebaseErrorMessage = (error: FirebaseError): string => {
+  switch (error.code) {
+    case "auth/invalid-email":
+      return "Invalid email address format.";
+    case "auth/user-disabled":
+      return "This account has been disabled.";
+    case "auth/user-not-found":
+      return "No account found with this email.";
+    case "auth/wrong-password":
+      return "Incorrect password.";
+    case "auth/invalid-credential":
+      return "Invalid email or password.";
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please try again later.";
+    default:
+      return "An error occurred. Please try again.";
+  }
+};
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -18,7 +38,7 @@ const Login: React.FC = () => {
   const location = useLocation();
   const { toast } = useToast();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/predict";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +55,19 @@ const Login: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      await login({ email, password });
+      await login(email, password);
       toast({
         title: "Welcome back!",
         description: "Successfully logged in",
       });
       navigate(from, { replace: true });
     } catch (error) {
+      const message = error instanceof FirebaseError 
+        ? getFirebaseErrorMessage(error)
+        : "Login failed. Please try again.";
       toast({
         title: "Login Failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
+        description: message,
         variant: "destructive",
       });
     } finally {

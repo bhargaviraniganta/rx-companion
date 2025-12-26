@@ -2,7 +2,7 @@ import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,8 @@ const DashboardHeader: React.FC = () => {
       .slice(0, 2);
   };
 
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
+
   return (
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -34,17 +36,17 @@ const DashboardHeader: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                  {user?.fullName ? getInitials(user.fullName) : <User className="h-4 w-4" />}
+                  {displayName ? getInitials(displayName) : <UserIcon className="h-4 w-4" />}
                 </div>
                 <span className="hidden sm:inline text-sm font-medium text-foreground">
-                  {user?.fullName || "User"}
+                  {displayName}
                 </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-popover border border-border shadow-lg z-50">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium text-foreground">{user?.fullName}</p>
+                  <p className="text-sm font-medium text-foreground">{displayName}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
               </DropdownMenuLabel>

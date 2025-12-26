@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { NavLink } from "@/components/NavLink";
-import { Menu, X, FlaskConical, Database, BarChart3, BookOpen, Info } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Menu, X, FlaskConical, Database, BarChart3, BookOpen, Info, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const navItems = [
   { title: "About Project", path: "/", icon: Info },
@@ -13,6 +15,12 @@ const navItems = [
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, logout, user } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    setMobileMenuOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
@@ -38,6 +46,30 @@ const Navbar: React.FC = () => {
                 {item.title}
               </NavLink>
             ))}
+            
+            {/* Auth Button */}
+            {isAuthenticated ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center gap-2 ml-2 text-muted-foreground hover:text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            ) : (
+              <Link to="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2 ml-2 text-muted-foreground hover:text-primary"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -68,6 +100,26 @@ const Navbar: React.FC = () => {
                   {item.title}
                 </NavLink>
               ))}
+              
+              {/* Mobile Auth Button */}
+              {isAuthenticated ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-muted transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-primary hover:bg-muted transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LogIn className="h-5 w-5" />
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         )}
