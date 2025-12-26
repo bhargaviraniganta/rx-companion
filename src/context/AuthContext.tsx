@@ -45,6 +45,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     await firebaseAuthService.logout();
+    setState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
   }, []);
 
   const forgotPassword = useCallback(async (email: string) => {
