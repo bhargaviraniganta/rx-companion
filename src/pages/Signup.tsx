@@ -76,16 +76,25 @@ const Signup: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("DEBUG: Attempting signup with email:", email);
       await signup(email, password);
+      console.log("DEBUG: Signup successful");
       toast({
         title: "Account Created!",
         description: "Please log in with your new account",
       });
       navigate("/login", { replace: true });
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("DEBUG: Signup failed with error:", error);
+      if (error instanceof FirebaseError) {
+        console.error("DEBUG: Firebase error code:", error.code);
+        console.error("DEBUG: Firebase error message:", error.message);
+      }
       const message = error instanceof FirebaseError 
         ? getFirebaseErrorMessage(error)
-        : "Registration failed. Please try again.";
+        : error instanceof Error 
+          ? error.message 
+          : "Registration failed. Please try again.";
       toast({
         title: "Registration Failed",
         description: message,
