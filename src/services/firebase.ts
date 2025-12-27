@@ -22,12 +22,25 @@ const isFirebaseConfigured = Boolean(
   firebaseConfig.projectId
 );
 
+// Debug: Log config status at startup
+console.log("Firebase config check:", { 
+  isConfigured: isFirebaseConfigured,
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasAuthDomain: !!firebaseConfig.authDomain,
+  hasProjectId: !!firebaseConfig.projectId
+});
+
 let app: ReturnType<typeof initializeApp> | null = null;
 let auth: ReturnType<typeof getAuth> | null = null;
 
 if (isFirebaseConfigured) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    console.log("Firebase initialized successfully");
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+  }
 }
 
 export { auth };
@@ -35,18 +48,38 @@ export { auth };
 export const firebaseAuthService = {
   login: async (email: string, password: string) => {
     if (!auth) {
+      console.error("Firebase not configured. Config:", { 
+        hasApiKey: !!firebaseConfig.apiKey, 
+        hasAuthDomain: !!firebaseConfig.authDomain, 
+        hasProjectId: !!firebaseConfig.projectId 
+      });
       throw new Error("Firebase is not configured. Please add your Firebase credentials.");
     }
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return userCredential.user;
+    } catch (error) {
+      console.error("Firebase login error:", error);
+      throw error;
+    }
   },
 
   signup: async (email: string, password: string) => {
     if (!auth) {
+      console.error("Firebase not configured. Config:", { 
+        hasApiKey: !!firebaseConfig.apiKey, 
+        hasAuthDomain: !!firebaseConfig.authDomain, 
+        hasProjectId: !!firebaseConfig.projectId 
+      });
       throw new Error("Firebase is not configured. Please add your Firebase credentials.");
     }
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      return userCredential.user;
+    } catch (error) {
+      console.error("Firebase signup error:", error);
+      throw error;
+    }
   },
 
   logout: async () => {
@@ -58,9 +91,19 @@ export const firebaseAuthService = {
 
   sendPasswordReset: async (email: string) => {
     if (!auth) {
+      console.error("Firebase not configured. Config:", { 
+        hasApiKey: !!firebaseConfig.apiKey, 
+        hasAuthDomain: !!firebaseConfig.authDomain, 
+        hasProjectId: !!firebaseConfig.projectId 
+      });
       throw new Error("Firebase is not configured. Please add your Firebase credentials.");
     }
-    await sendPasswordResetEmail(auth, email);
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      console.error("Firebase password reset error:", error);
+      throw error;
+    }
   },
 
   onAuthStateChanged: (callback: (user: User | null) => void) => {
