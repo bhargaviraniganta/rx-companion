@@ -26,8 +26,16 @@ let app: ReturnType<typeof initializeApp> | null = null;
 let auth: ReturnType<typeof getAuth> | null = null;
 
 if (isFirebaseConfigured) {
+  console.log("DEBUG: Initializing Firebase with config:", {
+    apiKey: firebaseConfig.apiKey ? firebaseConfig.apiKey.substring(0, 10) + "..." : "MISSING",
+    authDomain: firebaseConfig.authDomain || "MISSING",
+    projectId: firebaseConfig.projectId || "MISSING"
+  });
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
+  console.log("DEBUG: Firebase initialized, auth object:", !!auth);
+} else {
+  console.error("DEBUG: Firebase NOT configured - missing env vars");
 }
 
 export { auth };
