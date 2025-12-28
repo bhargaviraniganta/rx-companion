@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ const getFirebaseErrorMessage = (error: FirebaseError): string => {
     case "auth/too-many-requests":
       return "Too many failed attempts. Please try again later.";
     default:
-      return "An error occurred. Please try again.";
+      return error.message || "An error occurred. Please try again.";
   }
 };
 
@@ -33,12 +33,19 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/predict";
+  // Redirect to home if already authenticated
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+  
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,11 +67,13 @@ const Login: React.FC = () => {
         title: "Welcome back!",
         description: "Successfully logged in",
       });
-      navigate(from, { replace: true });
+      // Navigation happens via useEffect when isAuthenticated changes
     } catch (error) {
       const message = error instanceof FirebaseError 
         ? getFirebaseErrorMessage(error)
-        : "Login failed. Please try again.";
+        : error instanceof Error 
+          ? error.message 
+          : "Login failed. Please try again.";
       toast({
         title: "Login Failed",
         description: message,
@@ -74,6 +83,15 @@ const Login: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <AuthLayout>

@@ -9,81 +9,45 @@ import {
   User
 } from "firebase/auth";
 
+// Firebase configuration - using direct values since VITE_ env vars are build-time only
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "",
+  apiKey: "AIzaSyAW14pyx-GT0RU1Zd1cf2MtIUAOpmiZ1lk",
+  authDomain: "drug-excipient-analyser.firebaseapp.com",
+  projectId: "drug-excipient-analyser",
 };
 
-// Check if Firebase is configured
-const isFirebaseConfigured = Boolean(
-  firebaseConfig.apiKey && 
-  firebaseConfig.authDomain && 
-  firebaseConfig.projectId
-);
-
-let app: ReturnType<typeof initializeApp> | null = null;
-let auth: ReturnType<typeof getAuth> | null = null;
-
-if (isFirebaseConfigured) {
-  console.log("DEBUG: Initializing Firebase with config:", {
-    apiKey: firebaseConfig.apiKey ? firebaseConfig.apiKey.substring(0, 10) + "..." : "MISSING",
-    authDomain: firebaseConfig.authDomain || "MISSING",
-    projectId: firebaseConfig.projectId || "MISSING"
-  });
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  console.log("DEBUG: Firebase initialized, auth object:", !!auth);
-} else {
-  console.error("DEBUG: Firebase NOT configured - missing env vars");
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export { auth };
 
 export const firebaseAuthService = {
   login: async (email: string, password: string) => {
-    if (!auth) {
-      throw new Error("Firebase is not configured. Please add your Firebase credentials.");
-    }
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   },
 
   signup: async (email: string, password: string) => {
-    if (!auth) {
-      throw new Error("Firebase is not configured. Please add your Firebase credentials.");
-    }
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   },
 
   logout: async () => {
-    if (!auth) {
-      return;
-    }
     await signOut(auth);
   },
 
   sendPasswordReset: async (email: string) => {
-    if (!auth) {
-      throw new Error("Firebase is not configured. Please add your Firebase credentials.");
-    }
     await sendPasswordResetEmail(auth, email);
   },
 
   onAuthStateChanged: (callback: (user: User | null) => void) => {
-    if (!auth) {
-      callback(null);
-      return () => {};
-    }
     return onAuthStateChanged(auth, callback);
   },
 
   getCurrentUser: () => {
-    return auth?.currentUser ?? null;
+    return auth.currentUser;
   },
-
-  isConfigured: () => isFirebaseConfigured,
 };
 
 export type { User };

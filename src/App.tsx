@@ -26,17 +26,29 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public routes */}
+            {/* Public auth routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
-            {/* Layout-wrapped routes */}
+            {/* Protected routes - all wrapped in Layout */}
             <Route element={<Layout />}>
-              <Route path="/" element={<About />} />
-              <Route path="/references" element={<References />} />
-              
-              {/* Protected routes */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <About />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/references"
+                element={
+                  <ProtectedRoute>
+                    <References />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/predict"
                 element={

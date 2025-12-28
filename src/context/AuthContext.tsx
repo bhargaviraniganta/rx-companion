@@ -24,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
+    // Listen for auth state changes - this handles persistence automatically
     const unsubscribe = firebaseAuthService.onAuthStateChanged((user) => {
       setState({
         user,
@@ -37,19 +38,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string) => {
     await firebaseAuthService.login(email, password);
+    // State will be updated by onAuthStateChanged listener
   }, []);
 
   const signup = useCallback(async (email: string, password: string) => {
     await firebaseAuthService.signup(email, password);
+    // State will be updated by onAuthStateChanged listener
   }, []);
 
   const logout = useCallback(async () => {
     await firebaseAuthService.logout();
-    setState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
+    // State will be updated by onAuthStateChanged listener
   }, []);
 
   const forgotPassword = useCallback(async (email: string) => {
