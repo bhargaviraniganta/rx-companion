@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const getFirebaseErrorMessage = (error: FirebaseError): string => {
     case "auth/operation-not-allowed":
       return "Email/password accounts are not enabled.";
     default:
-      return "An error occurred. Please try again.";
+      return error.message || "An error occurred. Please try again.";
   }
 };
 
@@ -30,9 +30,16 @@ const Signup: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { signup } = useAuth();
+  const { signup, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const passwordRules = [
     { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
@@ -76,20 +83,13 @@ const Signup: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      console.log("DEBUG: Attempting signup with email:", email);
       await signup(email, password);
-      console.log("DEBUG: Signup successful");
       toast({
         title: "Account Created!",
-        description: "Please log in with your new account",
+        description: "You are now logged in",
       });
-      navigate("/login", { replace: true });
-    } catch (error: unknown) {
-      console.error("DEBUG: Signup failed with error:", error);
-      if (error instanceof FirebaseError) {
-        console.error("DEBUG: Firebase error code:", error.code);
-        console.error("DEBUG: Firebase error message:", error.message);
-      }
+      // Navigation happens via useEffect when isAuthenticated changes
+    } catch (error) {
       const message = error instanceof FirebaseError 
         ? getFirebaseErrorMessage(error)
         : error instanceof Error 
@@ -104,6 +104,15 @@ const Signup: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <AuthLayout>

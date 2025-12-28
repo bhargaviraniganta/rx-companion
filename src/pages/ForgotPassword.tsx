@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ const getFirebaseErrorMessage = (error: FirebaseError): string => {
     case "auth/too-many-requests":
       return "Too many requests. Please try again later.";
     default:
-      return "An error occurred. Please try again.";
+      return error.message || "An error occurred. Please try again.";
   }
 };
 
@@ -27,8 +27,16 @@ const ForgotPassword: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
-  const { forgotPassword } = useAuth();
+  const { forgotPassword, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +58,9 @@ const ForgotPassword: React.FC = () => {
     } catch (error) {
       const message = error instanceof FirebaseError 
         ? getFirebaseErrorMessage(error)
-        : "Failed to send reset email. Please try again.";
+        : error instanceof Error 
+          ? error.message 
+          : "Failed to send reset email. Please try again.";
       toast({
         title: "Error",
         description: message,
@@ -60,6 +70,15 @@ const ForgotPassword: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
