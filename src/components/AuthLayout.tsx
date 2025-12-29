@@ -59,7 +59,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           </div>
           
           <p className="text-sm opacity-70">
-            © 2024 DrugExciPredict. For research purposes only.
+            © 2025 DrugExciPredict. For research purposes only.
           </p>
         </div>
       </div>
