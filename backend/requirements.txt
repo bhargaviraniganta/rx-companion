@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+
+numpy<2.0
+scikit-learn==1.5.1
+joblib
+
+rdkit-pypi==2022.9.5
