@@ -1,13 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { BarChart3, Users, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity } from "lucide-react";
+import {
+  BarChart3,
+  Users,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  TrendingUp,
+  Activity,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDrugCount } from "@/data/drugDatabase";
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
+// 🔹 Backend URL
+const API_URL = "https://bhargavirani-rx-companion-backend.hf.space";
+
 const Analytics: React.FC = () => {
+  // -----------------------------
+  // Visitor count (client-side)
+  // -----------------------------
   const [visitorCount, setVisitorCount] = useState(0);
 
-  // Simulate visitor count using localStorage
   useEffect(() => {
     const storedCount = localStorage.getItem("drugexcipredict_visitors");
     const count = storedCount ? parseInt(storedCount, 10) : 0;
@@ -16,27 +29,68 @@ const Analytics: React.FC = () => {
     setVisitorCount(newCount);
   }, []);
 
-  // Mock statistics data
-  const stats = {
-    totalPredictions: 1247,
-    compatible: 823,
-    nonCompatible: 424,
-    lowRisk: 687,
-    highRisk: 560,
-    databaseSize: getDrugCount(),
-  };
+  // -----------------------------
+  // Real analytics from backend
+  // -----------------------------
+  const [stats, setStats] = useState<null | {
+    total_predictions: number;
+    compatible: number;
+    non_compatible: number;
+    low_risk: number;
+    medium_risk: number;
+    high_risk: number;
+  }>(null);
 
-  const compatibilityData = [
-    { name: "Compatible", value: stats.compatible, color: "hsl(145, 65%, 40%)" },
-    { name: "Non-Compatible", value: stats.nonCompatible, color: "hsl(0, 72%, 50%)" },
-  ];
+  useEffect(() => {
+    fetch(`${API_URL}/analytics`)
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch(() => {
+        // fail silently (demo-safe)
+      });
+  }, []);
 
-  const riskData = [
-    { name: "Low Risk", value: stats.lowRisk, color: "hsl(145, 65%, 40%)" },
-    { name: "High Risk", value: stats.highRisk, color: "hsl(38, 92%, 50%)" },
-  ];
+  // -----------------------------
+  // Chart data (REAL)
+  // -----------------------------
+  const compatibilityData = stats
+    ? [
+        {
+          name: "Compatible",
+          value: stats.compatible,
+          color: "hsl(145, 65%, 40%)",
+        },
+        {
+          name: "Non-Compatible",
+          value: stats.non_compatible,
+          color: "hsl(0, 72%, 50%)",
+        },
+      ]
+    : [];
 
+  const riskData = stats
+    ? [
+        {
+          name: "Low Risk",
+          value: stats.low_risk,
+          color: "hsl(145, 65%, 40%)",
+        },
+        {
+          name: "Medium Risk",
+          value: stats.medium_risk,
+          color: "hsl(38, 92%, 50%)",
+        },
+        {
+          name: "High Risk",
+          value: stats.high_risk,
+          color: "hsl(0, 72%, 50%)",
+        },
+      ]
+    : [];
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
@@ -57,9 +111,11 @@ const Analytics: React.FC = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Predictions</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Predictions
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-foreground mt-1">
-                  {stats.totalPredictions.toLocaleString()}
+                  {stats ? stats.total_predictions.toLocaleString() : "—"}
                 </p>
               </div>
               <div className="p-2 sm:p-3 rounded-full bg-primary/10">
@@ -73,9 +129,11 @@ const Analytics: React.FC = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Compatible Results</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Compatible Results
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-[hsl(145,65%,40%)] mt-1">
-                  {stats.compatible.toLocaleString()}
+                  {stats ? stats.compatible.toLocaleString() : "—"}
                 </p>
               </div>
               <div className="p-2 sm:p-3 rounded-full bg-[hsl(145,60%,94%)]">
@@ -89,9 +147,11 @@ const Analytics: React.FC = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Non-Compatible</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Non-Compatible
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-destructive mt-1">
-                  {stats.nonCompatible.toLocaleString()}
+                  {stats ? stats.non_compatible.toLocaleString() : "—"}
                 </p>
               </div>
               <div className="p-2 sm:p-3 rounded-full bg-[hsl(0,70%,95%)]">
@@ -105,7 +165,9 @@ const Analytics: React.FC = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Visitors</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Total Visitors
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-foreground mt-1">
                   {visitorCount.toLocaleString()}
                 </p>
@@ -118,9 +180,8 @@ const Analytics: React.FC = () => {
         </Card>
       </div>
 
-      {/* Charts Row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Compatibility Distribution */}
         <Card className="border-border shadow-card">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -140,11 +201,13 @@ const Analytics: React.FC = () => {
                     outerRadius={90}
                     paddingAngle={5}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
                     labelLine={false}
                   >
                     {compatibilityData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={index} fill={entry.color} />
                     ))}
                   </Pie>
                   <Legend />
@@ -154,7 +217,6 @@ const Analytics: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Risk Level Distribution */}
         <Card className="border-border shadow-card">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -174,11 +236,13 @@ const Analytics: React.FC = () => {
                     outerRadius={90}
                     paddingAngle={5}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
                     labelLine={false}
                   >
                     {riskData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={index} fill={entry.color} />
                     ))}
                   </Pie>
                   <Legend />
@@ -200,7 +264,7 @@ const Analytics: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Database Size</p>
                 <p className="text-xl font-bold text-foreground">
-                  {stats.databaseSize.toLocaleString()} compounds
+                  {getDrugCount().toLocaleString()} compounds
                 </p>
               </div>
             </div>
@@ -214,10 +278,10 @@ const Analytics: React.FC = () => {
                 <TrendingUp className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Prediction Accuracy</p>
-                <p className="text-xl font-bold text-foreground">
-                  87.3%
+                <p className="text-sm text-muted-foreground">
+                  Prediction Accuracy
                 </p>
+                <p className="text-xl font-bold text-foreground">87.3%</p>
               </div>
             </div>
           </CardContent>
