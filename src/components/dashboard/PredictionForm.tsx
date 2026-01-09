@@ -1,31 +1,12 @@
 import React from "react";
 import { PredictionInput } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ExcipientCombobox from "./ExcipientCombobox";
-import { FlaskConical, Loader2, Atom, TestTube } from "lucide-react";
 import DrugCombobox from "./DrugCombobox";
-
-
-/* 🔹 Drug name suggestions (editable, lightweight, no performance impact) */
-const DRUG_SUGGESTIONS = [
-  "Aspirin",
-  "Ibuprofen",
-  "Paracetamol",
-  "Metformin",
-  "Amoxicillin",
-  "Atorvastatin",
-  "Ciprofloxacin",
-  "Omeprazole",
-  "Losartan",
-  "Diclofenac",
-  "Clopidogrel",
-  "Azithromycin",
-  "Pantoprazole",
-  "Levothyroxine",
-  "Warfarin",
-];
+import SmilesCombobox from "./SmilesCombobox";
+import drugData from "@/data/drug_excipient_data.json";
+import { FlaskConical, Loader2, Atom, TestTube } from "lucide-react";
 
 interface PredictionFormProps {
   input: PredictionInput;
@@ -45,6 +26,23 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
     onSubmit();
   };
 
+  /* 🔹 FIXED: match JSON keys EXACTLY */
+const normalize = (text: string) =>
+  text.toLowerCase().replace(/\(.*?\)/g, "").trim();
+
+const matchingSmiles = React.useMemo(() => {
+  if (!input.drugName) return [];
+
+  const inputNorm = normalize(input.drugName);
+
+  return drugData
+    .filter((d: any) =>
+      normalize(d["DRUG NAME"]).includes(inputNorm)
+    )
+    .map((d: any) => d["SMILE CODE (drug)"]);
+}, [input.drugName]);
+
+
   return (
     <div className="bg-card rounded-xl shadow-card p-6 h-full">
       <div className="flex items-center gap-3 mb-6">
@@ -62,46 +60,46 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* 🔹 Drug Name (dropdown + typing) */}
+        {/* Drug Name */}
         <div className="space-y-2">
-        <Label htmlFor="drugName" className="flex items-center gap-2">
-          <FlaskConical className="h-4 w-4 text-muted-foreground" />
-          Drug Name
-        </Label>
-
-        <DrugCombobox
-          value={input.drugName}
-          onChange={(value) =>
-            onChange({ ...input, drugName: value })
-          }
-          disabled={isLoading}
-        />
-      </div>
-
-        {/* SMILES */}
-        <div className="space-y-2">
-          <Label htmlFor="smilesCode" className="flex items-center gap-2">
-            <Atom className="h-4 w-4 text-muted-foreground" />
-            SMILES Code
+          <Label className="flex items-center gap-2">
+            <FlaskConical className="h-4 w-4 text-muted-foreground" />
+            Drug Name
           </Label>
-          <Input
-            id="smilesCode"
-            type="text"
-            placeholder="e.g., CC(=O)OC1=CC=CC=C1C(=O)O"
-            value={input.smilesCode}
-            onChange={(e) =>
-              onChange({ ...input, smilesCode: e.target.value })
+
+          <DrugCombobox
+            value={input.drugName}
+            onChange={(value) =>
+              onChange({ ...input, drugName: value, smilesCode: "" })
             }
             disabled={isLoading}
           />
+        </div>
+
+        {/* SMILES Code */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Atom className="h-4 w-4 text-muted-foreground" />
+            SMILES Code
+          </Label>
+
+          <SmilesCombobox
+            value={input.smilesCode}
+            options={matchingSmiles}
+            onChange={(value) =>
+              onChange({ ...input, smilesCode: value })
+            }
+            disabled={isLoading}
+          />
+
           <p className="text-xs text-muted-foreground">
-            Simplified Molecular Input Line Entry System notation
+            Suggested from database based on selected drug
           </p>
         </div>
 
         {/* Excipient */}
         <div className="space-y-2">
-          <Label htmlFor="excipient">Excipient</Label>
+          <Label>Excipient</Label>
           <ExcipientCombobox
             value={input.excipient}
             onChange={(value) =>
@@ -109,9 +107,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
             }
             disabled={isLoading}
           />
-          <p className="text-xs text-muted-foreground">
-            Select from suggestions or enter a custom excipient
-          </p>
         </div>
 
         {/* Submit */}
@@ -141,24 +136,14 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
         </Button>
       </form>
 
-      {/* Tips */}
       <div className="mt-6 pt-6 border-t border-border">
         <h3 className="text-sm font-medium text-foreground mb-3">
           Quick Tips
         </h3>
         <ul className="space-y-2 text-xs text-muted-foreground">
-          <li className="flex items-start gap-2">
-            <span className="text-primary">•</span>
-            Use canonical SMILES for consistent results
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-primary">•</span>
-            Check for stereochemistry when applicable
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-primary">•</span>
-            Consider salt forms in drug name
-          </li>
+          <li>• Use canonical SMILES for consistent results</li>
+          <li>• Check stereochemistry when applicable</li>
+          <li>• Consider salt forms in drug name</li>
         </ul>
       </div>
     </div>

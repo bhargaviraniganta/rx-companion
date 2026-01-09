@@ -1,22 +1,44 @@
 import React, { useState } from "react";
-import { PredictionInput, PredictionResult as PredictionResultType } from "@/types";
+import {
+  PredictionInput,
+  PredictionResult as PredictionResultType,
+} from "@/types";
 import { predictionService } from "@/services/predictionService";
 import PredictionForm from "@/components/dashboard/PredictionForm";
 import PredictionResultComponent from "@/components/dashboard/PredictionResult";
 import { useToast } from "@/hooks/use-toast";
 import { updateAnalytics } from "@/services/analyticsService";
 
-
 const PredictionTool: React.FC = () => {
-  const [input, setInput] = useState<PredictionInput>({
-    drugName: "",
-    smilesCode: "",
-    excipient: "",
+  /* ============================
+     🔹 PERSIST INPUT STATE
+     ============================ */
+  const [input, setInput] = useState<PredictionInput>(() => {
+    const saved = localStorage.getItem("prediction_input");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          drugName: "",
+          smilesCode: "",
+          excipient: "",
+        };
   });
+
   const [result, setResult] = useState<PredictionResultType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  /* ============================
+     🔹 HANDLE INPUT CHANGE
+     ============================ */
+  const handleInputChange = (newInput: PredictionInput) => {
+    setInput(newInput);
+    localStorage.setItem("prediction_input", JSON.stringify(newInput));
+  };
+
+  /* ============================
+     🔹 PREDICTION HANDLER
+     ============================ */
   const handlePredict = async () => {
     if (!input.drugName.trim()) {
       toast({
@@ -59,27 +81,42 @@ const PredictionTool: React.FC = () => {
 
     try {
       const prediction = await predictionService.predict(input);
-/* ============================
-   🔹 UPDATE FIRESTORE ANALYTICS
-   ============================ */
+
+      /* ============================
+         🔹 UPDATE FIRESTORE ANALYTICS
+         ============================ */
       await updateAnalytics({
-        prediction: prediction.compatible ? "Compatible" : "Incompatible",
+        prediction: prediction.compatible
+          ? "Compatible"
+          : "Incompatible",
         risk_level:
           prediction.riskLevel.charAt(0) +
           prediction.riskLevel.slice(1).toLowerCase(),
       });
-/* ============================
-   UI UPDATE (UNCHANGED)
-   ============================ */
+
+      /* ============================
+         🔹 UI UPDATE
+         ============================ */
       setResult(prediction);
+
       toast({
         title: "Analysis Complete",
-        description: `Prediction: ${prediction.compatible ? "Compatible" : "Non-Compatible"}`,
+        description: `Prediction: ${
+          prediction.compatible ? "Compatible" : "Non-Compatible"
+        }`,
       });
+
+      // ❗ OPTIONAL:
+      // If you want to clear inputs AFTER prediction, uncomment below
+      // localStorage.removeItem("prediction_input");
+
     } catch (error) {
       toast({
         title: "Prediction Error",
-        description: error instanceof Error ? error.message : "Failed to generate prediction",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate prediction",
         variant: "destructive",
       });
     } finally {
@@ -87,6 +124,9 @@ const PredictionTool: React.FC = () => {
     }
   };
 
+  /* ============================
+     🔹 UI
+     ============================ */
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
@@ -94,7 +134,8 @@ const PredictionTool: React.FC = () => {
           Drug-Excipient Compatibility Predictor
         </h1>
         <p className="text-muted-foreground mt-1">
-          Analyze potential interactions between active pharmaceutical ingredients and excipients
+          Analyze potential interactions between active pharmaceutical
+          ingredients and excipients
         </p>
       </div>
 
@@ -102,13 +143,17 @@ const PredictionTool: React.FC = () => {
         <div className="min-w-[400px] flex-1">
           <PredictionForm
             input={input}
-            onChange={setInput}
+            onChange={handleInputChange}
             onSubmit={handlePredict}
             isLoading={isLoading}
           />
         </div>
+
         <div className="min-w-[400px] flex-1">
-          <PredictionResultComponent result={result} isLoading={isLoading} />
+          <PredictionResultComponent
+            result={result}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </main>
