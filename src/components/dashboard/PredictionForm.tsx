@@ -5,6 +5,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ExcipientCombobox from "./ExcipientCombobox";
 import { FlaskConical, Loader2, Atom, TestTube } from "lucide-react";
+import DrugCombobox from "./DrugCombobox";
+
+
+/* 🔹 Drug name suggestions (editable, lightweight, no performance impact) */
+const DRUG_SUGGESTIONS = [
+  "Aspirin",
+  "Ibuprofen",
+  "Paracetamol",
+  "Metformin",
+  "Amoxicillin",
+  "Atorvastatin",
+  "Ciprofloxacin",
+  "Omeprazole",
+  "Losartan",
+  "Diclofenac",
+  "Clopidogrel",
+  "Azithromycin",
+  "Pantoprazole",
+  "Levothyroxine",
+  "Warfarin",
+];
 
 interface PredictionFormProps {
   input: PredictionInput;
@@ -31,27 +52,33 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
           <TestTube className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Input Parameters</h2>
-          <p className="text-sm text-muted-foreground">Enter drug and excipient details</p>
+          <h2 className="text-lg font-semibold text-foreground">
+            Input Parameters
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Enter drug and excipient details
+          </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* 🔹 Drug Name (dropdown + typing) */}
         <div className="space-y-2">
-          <Label htmlFor="drugName" className="flex items-center gap-2">
-            <FlaskConical className="h-4 w-4 text-muted-foreground" />
-            Drug Name
-          </Label>
-          <Input
-            id="drugName"
-            type="text"
-            placeholder="e.g., Aspirin, Ibuprofen, Metformin"
-            value={input.drugName}
-            onChange={(e) => onChange({ ...input, drugName: e.target.value })}
-            disabled={isLoading}
-          />
-        </div>
+        <Label htmlFor="drugName" className="flex items-center gap-2">
+          <FlaskConical className="h-4 w-4 text-muted-foreground" />
+          Drug Name
+        </Label>
 
+        <DrugCombobox
+          value={input.drugName}
+          onChange={(value) =>
+            onChange({ ...input, drugName: value })
+          }
+          disabled={isLoading}
+        />
+      </div>
+
+        {/* SMILES */}
         <div className="space-y-2">
           <Label htmlFor="smilesCode" className="flex items-center gap-2">
             <Atom className="h-4 w-4 text-muted-foreground" />
@@ -62,7 +89,9 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
             type="text"
             placeholder="e.g., CC(=O)OC1=CC=CC=C1C(=O)O"
             value={input.smilesCode}
-            onChange={(e) => onChange({ ...input, smilesCode: e.target.value })}
+            onChange={(e) =>
+              onChange({ ...input, smilesCode: e.target.value })
+            }
             disabled={isLoading}
           />
           <p className="text-xs text-muted-foreground">
@@ -70,11 +99,14 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
           </p>
         </div>
 
+        {/* Excipient */}
         <div className="space-y-2">
           <Label htmlFor="excipient">Excipient</Label>
           <ExcipientCombobox
             value={input.excipient}
-            onChange={(value) => onChange({ ...input, excipient: value })}
+            onChange={(value) =>
+              onChange({ ...input, excipient: value })
+            }
             disabled={isLoading}
           />
           <p className="text-xs text-muted-foreground">
@@ -82,12 +114,18 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
           </p>
         </div>
 
+        {/* Submit */}
         <Button
           type="submit"
           className="w-full mt-6"
           size="lg"
           variant="gradient"
-          disabled={isLoading || !input.drugName || !input.smilesCode || !input.excipient}
+          disabled={
+            isLoading ||
+            !input.drugName ||
+            !input.smilesCode ||
+            !input.excipient
+          }
         >
           {isLoading ? (
             <>
@@ -103,8 +141,11 @@ const PredictionForm: React.FC<PredictionFormProps> = ({
         </Button>
       </form>
 
+      {/* Tips */}
       <div className="mt-6 pt-6 border-t border-border">
-        <h3 className="text-sm font-medium text-foreground mb-3">Quick Tips</h3>
+        <h3 className="text-sm font-medium text-foreground mb-3">
+          Quick Tips
+        </h3>
         <ul className="space-y-2 text-xs text-muted-foreground">
           <li className="flex items-start gap-2">
             <span className="text-primary">•</span>

@@ -15,43 +15,36 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-/* 🔹 Extended excipient list (pharma-relevant, editable) */
-const EXCIPIENTS: string[] = [
-  "Lactose Monohydrate",
-  "Microcrystalline Cellulose",
-  "Magnesium Stearate",
-  "Starch",
-  "Povidone (PVP)",
-  "HPMC",
-  "Sodium Starch Glycolate",
-  "Croscarmellose Sodium",
-  "Crospovidone",
-  "Mannitol",
-  "Sorbitol",
-  "Dicalcium Phosphate",
-  "Calcium Phosphate",
-  "Colloidal Silicon Dioxide",
-  "Talc",
-  "Stearic Acid",
-  "Sodium Bicarbonate",
-  "Citric Acid",
-  "PEG 400",
-  "PEG 6000",
-  "Polysorbate 80",
-  "Sodium Lauryl Sulfate",
+/* 🔹 Drug suggestions (editable) */
+const DRUGS: string[] = [
+  "Aspirin",
+  "Ibuprofen",
+  "Paracetamol",
+  "Metformin",
+  "Amoxicillin",
+  "Atorvastatin",
+  "Ciprofloxacin",
+  "Omeprazole",
+  "Losartan",
+  "Diclofenac",
+  "Clopidogrel",
+  "Azithromycin",
+  "Pantoprazole",
+  "Levothyroxine",
+  "Warfarin",
 ];
 
-interface ExcipientComboboxProps {
+interface DrugComboboxProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
 }
 
-export default function ExcipientCombobox({
+export default function DrugCombobox({
   value,
   onChange,
   disabled,
-}: ExcipientComboboxProps) {
+}: DrugComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -64,29 +57,25 @@ export default function ExcipientCombobox({
           disabled={disabled}
           className="w-full justify-between"
         >
-          {value ? value : "Select or type excipient"}
+          {value || "Select or type drug name"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
 
       <PopoverContent className="w-full p-0">
         <Command>
-          {/* 🔹 Search + free typing */}
           <CommandInput
-            placeholder="Search or type excipient..."
-            onValueChange={(val) => {
-              // Allow free text entry
-              onChange(val);
-            }}
+            placeholder="Search or type drug name..."
+            onValueChange={(val) => onChange(val)}
           />
 
-          <CommandEmpty>No excipient found.</CommandEmpty>
+          <CommandEmpty>No drug found.</CommandEmpty>
 
           <CommandGroup>
-            {EXCIPIENTS.map((excipient) => (
+            {DRUGS.map((drug) => (
               <CommandItem
-                key={excipient}
-                value={excipient}
+                key={drug}
+                value={drug}
                 onSelect={(currentValue) => {
                   onChange(currentValue);
                   setOpen(false);
@@ -95,10 +84,10 @@ export default function ExcipientCombobox({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === excipient ? "opacity-100" : "opacity-0"
+                    value === drug ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {excipient}
+                {drug}
               </CommandItem>
             ))}
           </CommandGroup>
