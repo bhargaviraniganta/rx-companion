@@ -4,6 +4,8 @@ import { predictionService } from "@/services/predictionService";
 import PredictionForm from "@/components/dashboard/PredictionForm";
 import PredictionResultComponent from "@/components/dashboard/PredictionResult";
 import { useToast } from "@/hooks/use-toast";
+import { updateAnalytics } from "@/services/analyticsService";
+
 
 const PredictionTool: React.FC = () => {
   const [input, setInput] = useState<PredictionInput>({
@@ -57,6 +59,18 @@ const PredictionTool: React.FC = () => {
 
     try {
       const prediction = await predictionService.predict(input);
+/* ============================
+   🔹 UPDATE FIRESTORE ANALYTICS
+   ============================ */
+      await updateAnalytics({
+        prediction: prediction.compatible ? "Compatible" : "Incompatible",
+        risk_level:
+          prediction.riskLevel.charAt(0) +
+          prediction.riskLevel.slice(1).toLowerCase(),
+      });
+/* ============================
+   UI UPDATE (UNCHANGED)
+   ============================ */
       setResult(prediction);
       toast({
         title: "Analysis Complete",

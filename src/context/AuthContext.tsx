@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { firebaseAuthService, User } from "@/services/firebase";
+import { registerVisitor } from "@/services/analyticsService";
+
 
 interface AuthState {
   user: User | null;
@@ -24,17 +26,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    // Listen for auth state changes - this handles persistence automatically
-    const unsubscribe = firebaseAuthService.onAuthStateChanged((user) => {
-      setState({
-        user,
-        isAuthenticated: !!user,
-        isLoading: false,
-      });
+  const unsubscribe = firebaseAuthService.onAuthStateChanged(async (user) => {
+    setState({
+      user,
+      isAuthenticated: !!user,
+      isLoading: false,
     });
 
-    return () => unsubscribe();
-  }, []);
+    // 🔹 Register visitor ONCE per authenticated user
+    if (user) {
+      await registerVisitor();
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
+
 
   const login = useCallback(async (email: string, password: string) => {
     await firebaseAuthService.login(email, password);

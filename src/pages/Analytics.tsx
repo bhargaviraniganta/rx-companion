@@ -11,48 +11,41 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDrugCount } from "@/data/drugDatabase";
 import { ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { fetchAnalytics } from "@/services/analyticsService";
 
-// 🔹 Backend URL
-const API_URL = "https://bhargavirani-rx-companion-backend.hf.space";
+interface AnalyticsState {
+  total_predictions: number;
+  compatible: number;
+  non_compatible: number;
+  low_risk: number;
+  medium_risk: number;
+  high_risk: number;
+  totalVisitors: number;
+}
 
 const Analytics: React.FC = () => {
-  // -----------------------------
-  // Visitor count (client-side)
-  // -----------------------------
-  const [visitorCount, setVisitorCount] = useState(0);
+  const [stats, setStats] = useState<AnalyticsState | null>(null);
 
+  // --------------------------------
+  // Load analytics from Firestore
+  // --------------------------------
   useEffect(() => {
-    const storedCount = localStorage.getItem("drugexcipredict_visitors");
-    const count = storedCount ? parseInt(storedCount, 10) : 0;
-    const newCount = count + 1;
-    localStorage.setItem("drugexcipredict_visitors", newCount.toString());
-    setVisitorCount(newCount);
-  }, []);
-
-  // -----------------------------
-  // Real analytics from backend
-  // -----------------------------
-  const [stats, setStats] = useState<null | {
-    total_predictions: number;
-    compatible: number;
-    non_compatible: number;
-    low_risk: number;
-    medium_risk: number;
-    high_risk: number;
-  }>(null);
-
-  useEffect(() => {
-    fetch(`${API_URL}/analytics`)
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch(() => {
-        // fail silently (demo-safe)
+    fetchAnalytics().then((data) => {
+      setStats({
+        total_predictions: data.totalPredictions ?? 0,
+        compatible: data.compatible ?? 0,
+        non_compatible: data.nonCompatible ?? 0,
+        low_risk: data.lowRisk ?? 0,
+        medium_risk: data.mediumRisk ?? 0,
+        high_risk: data.highRisk ?? 0,
+        totalVisitors: data.totalVisitors ?? 0,
       });
+    });
   }, []);
 
-  // -----------------------------
-  // Chart data (REAL)
-  // -----------------------------
+  // --------------------------------
+  // Chart data
+  // --------------------------------
   const compatibilityData = stats
     ? [
         {
@@ -88,9 +81,9 @@ const Analytics: React.FC = () => {
       ]
     : [];
 
-  // -----------------------------
+  // --------------------------------
   // UI
-  // -----------------------------
+  // --------------------------------
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
@@ -169,7 +162,7 @@ const Analytics: React.FC = () => {
                   Total Visitors
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-foreground mt-1">
-                  {visitorCount.toLocaleString()}
+                  {stats ? stats.totalVisitors.toLocaleString() : "—"}
                 </p>
               </div>
               <div className="p-2 sm:p-3 rounded-full bg-primary/10">
